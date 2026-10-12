@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.12', '3.13']
+    defaults:
+      run:
+        working-directory: windows
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install pinned packages
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt pytest==9.1.1
+      - name: Tests
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: python -m pytest -q tests
+      - name: Every module imports
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: python -c "import heyaside.app, heyaside.tts, heyaside.stt, heyaside.audio, heyaside.island, heyaside.hotkey; print('imports ok')"
+      - name: Wake-word model loads and stays quiet on silence
+        run: |
+          python -c "import numpy as np; from heyaside import audio; audio.ensure_wake_models(); w = audio.WakeWord(0.5); hits = sum(w.feed(np.zeros(audio.FRAME, np.float32)) for _ in range(50)); print('false wakes on silence:', hits); assert hits == 0"

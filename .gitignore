@@ -1,0 +1,14 @@
+# build output and local environments
+mac/build/
+windows/.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+# never commit personal state
+*.log
+settings.json
+.DS_Store
+*.key
+*.crt
+*.pem
+.env

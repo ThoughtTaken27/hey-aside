@@ -20,7 +20,7 @@ powershell -ExecutionPolicy Bypass -File .\install.ps1
 `-ExecutionPolicy Bypass` applies to that one command only; your system policy is not changed. The script:
 
 1. makes a private Python environment in `windows\.venv`,
-2. installs the pinned packages in `requirements.txt`,
+2. installs the exact packages in `requirements.txt`, each verified against its SHA-256 hash (the list is generated from `requirements.in`),
 3. downloads the wake-word model (openWakeWord, ~6 MB) and the speech-to-text model (Whisper base.en, ~145 MB),
 4. adds Hey Aside to your login items (`HKCU\...\Run\HeyAside`, no admin) and starts it.
 

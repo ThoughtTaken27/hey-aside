@@ -3,7 +3,7 @@
 #
 # What it does, all inside your user account (no admin rights):
 #   1. Creates a private Python environment in .venv next to this file.
-#   2. Installs the pinned packages from requirements.txt.
+#   2. Installs the exact packages in requirements.txt, each checked against its SHA-256 hash.
 #   3. Downloads the wake-word model ("hey jarvis") and the speech-to-text model.
 #   4. Adds Hey Aside to your login items (HKCU Run) and starts it.
 # Undo everything with .\uninstall.ps1.
@@ -28,8 +28,7 @@ Write-Host "Using Python: $py"
 
 if (-not (Test-Path .venv\Scripts\python.exe)) { & $py -m venv .venv }
 $vpy = Join-Path $PSScriptRoot '.venv\Scripts\python.exe'
-& $vpy -m pip install --upgrade pip --quiet
-& $vpy -m pip install --require-virtualenv -r requirements.txt
+& $vpy -m pip install --require-virtualenv --require-hashes -r requirements.txt
 if ($LASTEXITCODE -ne 0) { throw 'Package install failed (see above).' }
 
 Write-Host 'Downloading the wake-word and speech models (first run only)...'

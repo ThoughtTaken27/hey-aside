@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from heyaside import hotkey
 from heyaside.audio import FRAME, RATE, Endpointer, level
@@ -44,3 +45,16 @@ def test_hotkey_parsing():
     assert vk == ord("J") and mods & 0x3 == 0x3
     assert hotkey.parse("ctrl+alt+space")[1] == 0x20
     assert hotkey.parse("hyper+j") is None
+
+
+def test_edge_tts_is_pointed_at_the_current_host(monkeypatch):
+    pytest.importorskip("edge_tts")
+    from edge_tts import communicate, constants
+
+    from heyaside import tts
+
+    monkeypatch.setattr(communicate, "WSS_URL", "wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=x")
+    monkeypatch.setattr(constants, "WSS_URL", communicate.WSS_URL)
+    assert tts.use_current_edge_host() is True
+    assert communicate.WSS_URL.startswith("wss://api.msedgeservices.com/tts/cognitiveservices/websocket/v1?Ocp-Apim-Subscription-Key=")
+    assert tts.use_current_edge_host() is False  # already current: left alone

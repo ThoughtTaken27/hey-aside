@@ -62,7 +62,7 @@ Voice barge-in is not supported on Windows (there is no system echo cancellation
 | No tray orb after install | Check `%LOCALAPPDATA%\HeyAside\Logs\heyaside.log`; run `.venv\Scripts\python -m heyaside --verbose` from this folder to see errors |
 | "Aside CLI not found" | Install the CLI, open a new terminal, confirm `aside --version`, or set `asideCli` |
 | Never wakes | Microphone permission for desktop apps; the right `micDevice`; lower `wakeThreshold` |
-| Robotic voice instead of Ryan | Microsoft's read-aloud service refused the request (it changed in October 2026). Jarvis falls back to Windows' British voice automatically. Upgrade later with `.venv\Scripts\python -m pip install -U edge-tts` |
+| Robotic voice instead of Ryan | Microsoft's read-aloud service did not answer (no internet, or a service change). Jarvis falls back to Windows' British voice for 5 minutes, then tries Ryan again. Do not upgrade packages by hand: `requirements.txt` is hash-locked |
 | Answers are cut short | By design: speech is capped at a few sentences; the full answer is in the Aside chat |
 
 ## Uninstall

@@ -66,7 +66,8 @@ final class EdgeTTS: NSObject, URLSessionWebSocketDelegate {
     }
 
     private static func serverSkew() async -> TimeInterval? {
-        var r = URLRequest(url: URL(string: "https://speech.platform.bing.com/")!); r.httpMethod = "HEAD"
+        // The host that checks the token (api.msedgeservices.com) is the one whose clock matters.
+        var r = URLRequest(url: URL(string: "https://api.msedgeservices.com/")!); r.httpMethod = "HEAD"
         guard let (_, resp) = try? await URLSession.shared.data(for: r), let h = resp as? HTTPURLResponse,
               let d = h.value(forHTTPHeaderField: "Date") else { return nil }
         let f = DateFormatter(); f.locale = Locale(identifier: "en_US_POSIX"); f.dateFormat = "EEE, dd MMM yyyy HH:mm:ss zzz"
@@ -82,9 +83,11 @@ final class EdgeTTS: NSObject, URLSessionWebSocketDelegate {
 
     private func makeSocket() -> URLSessionWebSocketTask {
         let cid = UUID().uuidString.replacingOccurrences(of: "-", with: "").lowercased()
-        var comps = URLComponents(string: "wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1")!
+        // Since October 2026 the old speech.platform.bing.com host answers 403; Edge now
+        // synthesizes through api.msedgeservices.com with the same client id (edge-tts#491).
+        var comps = URLComponents(string: "wss://api.msedgeservices.com/tts/cognitiveservices/websocket/v1")!
         comps.queryItems = [
-            .init(name: "TrustedClientToken", value: Self.token), .init(name: "ConnectionId", value: cid),
+            .init(name: "Ocp-Apim-Subscription-Key", value: Self.token), .init(name: "ConnectionId", value: cid),
             .init(name: "Sec-MS-GEC", value: Self.secMsGec()), .init(name: "Sec-MS-GEC-Version", value: "1-\(Self.chromium)"),
         ]
         var req = URLRequest(url: comps.url!)

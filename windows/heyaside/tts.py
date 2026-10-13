@@ -22,8 +22,27 @@ _counter = itertools.count()
 TMP = Path(tempfile.gettempdir()) / "heyaside-tts"
 
 
+LEGACY_HOST = "speech.platform.bing.com"
+EDGE_WSS = "wss://api.msedgeservices.com/tts/cognitiveservices/websocket/v1?Ocp-Apim-Subscription-Key="
+
+
+def use_current_edge_host() -> bool:
+    """Since October 2026 the old host answers synthesis with 403; Edge itself now uses
+    api.msedgeservices.com with the same public client id (rany2/edge-tts#491). Point
+    edge-tts 7.2.8 there. Does nothing once an edge-tts release already uses a new host."""
+    from edge_tts import communicate, constants
+
+    if LEGACY_HOST not in communicate.WSS_URL:
+        return False
+    url = EDGE_WSS + constants.TRUSTED_CLIENT_TOKEN
+    constants.WSS_URL = communicate.WSS_URL = url
+    return True
+
+
 def synthesize(text: str, voice: str, rate: str) -> bytes:
     import edge_tts
+
+    use_current_edge_host()
 
     async def run() -> bytes:
         out = bytearray()

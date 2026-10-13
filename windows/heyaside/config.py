@@ -50,7 +50,7 @@ DEFAULTS: dict = {
 def load() -> dict:
     data = dict(DEFAULTS)
     try:
-        user = json.loads(SETTINGS_FILE.read_text(encoding="utf-8"))
+        user = json.loads(SETTINGS_FILE.read_text(encoding="utf-8-sig"))  # tolerate a BOM (PowerShell 5, some editors)
         if isinstance(user, dict):
             data.update({k: v for k, v in user.items() if k in DEFAULTS})
     except (OSError, ValueError):

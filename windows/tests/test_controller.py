@@ -107,3 +107,12 @@ def test_bare_wake_word_asks_again(ctl):
     c.from_wake = True
     c.on_text("Hey Jarvis", True)
     assert pump(qapp, lambda: c.state == "followup")
+
+
+def test_settings_file_with_bom_is_read(tmp_path, monkeypatch):
+    from heyaside import config
+
+    f = tmp_path / "settings.json"
+    f.write_bytes(b"\xef\xbb\xbf" + b'{"jev": "C:\\\\x\\\\jev"}')
+    monkeypatch.setattr(config, "SETTINGS_FILE", f)
+    assert config.load()["jev"] == "C:\\x\\jev"
